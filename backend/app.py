@@ -426,7 +426,7 @@ def scrape_url():
 @app.route('/api/history', methods=['GET'])
 def get_scraping_history():
     try:
-        if scraping_jobs_collection:
+        if scraping_jobs_collection is not None:
             # Get the most recent scraping jobs
             jobs = list(scraping_jobs_collection.find({}).sort('createdAt', -1).limit(10))
             
@@ -451,7 +451,7 @@ def register():
             return jsonify({'message': 'Email and password are required'}), 400
         
         # Check if user already exists
-        if db and db.users.find_one({'email': email}):
+        if db is not None and db.users.find_one({'email': email}):
             return jsonify({'message': 'User already exists'}), 409
         
         # Hash password
@@ -465,7 +465,7 @@ def register():
             'isActive': True
         }
         
-        if db:
+        if db is not None:
             result = db.users.insert_one(user_data)
             user_data['_id'] = str(result.inserted_id)
         
@@ -495,7 +495,7 @@ def login():
             return jsonify({'message': 'Email and password are required'}), 400
         
         # Find user
-        if db:
+        if db is not None:
             user = db.users.find_one({'email': email})
         else:
             return jsonify({'message': 'Database not available'}), 500
@@ -533,7 +533,7 @@ def profile():
         
         try:
             payload = jwt.decode(token, SECRET_KEY, algorithms=['HS256'])
-            if db:
+            if db is not None:
                 user = db.users.find_one({'_id': ObjectId(payload['user_id'])})
                 if user:
                     return jsonify({'email': user['email'], 'id': str(user['_id'])})
